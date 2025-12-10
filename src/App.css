@@ -1,0 +1,170 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Amazon Ember', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: #232F3E;
+  background-color: #FAFAFA;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.header {
+  background: linear-gradient(135deg, #232F3E 0%, #37475A 100%);
+  color: white;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 300;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+.main {
+  flex: 1;
+  padding: 80px 0;
+}
+
+.migration-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 80px;
+  flex-wrap: wrap;
+}
+
+.service-card {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #E5E5E5;
+  min-width: 240px;
+}
+
+.service-icon {
+  margin: 0 auto 20px;
+  width: 48px;
+  height: 48px;
+}
+
+.service-card h3 {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+  color: #232F3E;
+  font-weight: 500;
+}
+
+.service-card p {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.benefits {
+  text-align: center;
+}
+
+.benefits h2 {
+  font-size: 2rem;
+  margin-bottom: 48px;
+  color: #232F3E;
+  font-weight: 400;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  margin-top: 40px;
+}
+
+.benefit {
+  background: white;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E5E5E5;
+}
+
+.benefit h4 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+  color: #FF9900;
+  font-weight: 500;
+}
+
+.benefit p {
+  color: #666;
+  line-height: 1.5;
+}
+
+.footer {
+  background: #232F3E;
+  color: white;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.footer p {
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 2rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .migration-flow {
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .arrow {
+    transform: rotate(90deg);
+  }
+  
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .container {
+    padding: 0 16px;
+  }
+}

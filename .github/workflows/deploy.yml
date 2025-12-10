@@ -1,0 +1,93 @@
+name: Build and Deploy to ECS
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github-actions-ecs-role
+        role-session-name: GitHubActionsECSDeployment
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        COMMIT_HASH: ${{ github.sha }}
+      run: |
+        SHORT_SHA=$(echo $COMMIT_HASH | cut -c 1-7)
+        docker build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_SHA
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_SHA
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_SHA" >> $GITHUB_OUTPUT
+
+    - name: Deploy to ECS Express Mode 
+      uses: aws-actions/amazon-ecs-deploy-express-service@v1
+      with:
+        # Required inputs
+        service-name: ${{ env.ECS_SERVICE }}
+        image: ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
+        execution-role-arn: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ecsTaskExecutionRole
+        infrastructure-role-arn: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ecsInfrastructureRoleForExpressServices
+        
+        # Service identification
+        cluster: ${{ env.ECS_CLUSTER }} 
+        
+        # Container configuration
+        container-port: 8080
+        environment-variables: |
+          [
+            {"name": "ENV", "value": "Prod"}
+          ]
+        
+        # Resource configuration
+        cpu: '1024'
+        memory: '2048'
+        task-role-arn: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ecsTaskExecutionRole
+        
+        # Service configuration
+        health-check-path: /health
+          
+        # Auto-scaling configuration
+        min-task-count: 1
+        max-task-count: 4
+        auto-scaling-metric: AVERAGE_CPU
+        auto-scaling-target-value: 70          
+
+    - name: Check deployment status
+      run: |
+        SERVICE_ARN="arn:aws:ecs:${{ env.AWS_REGION }}:${{ env.AWS_ACCOUNT_ID }}:service/${{ env.ECS_CLUSTER }}/${{ env.ECS_SERVICE }}"
+        aws ecs describe-express-gateway-service \
+          --service-arn $SERVICE_ARN \
+          --region ${{ env.AWS_REGION }} \
+          --query 'service.status'
+      continue-on-error: true
