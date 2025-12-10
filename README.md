@@ -49,6 +49,12 @@ docker build -t express-web-app .
 docker run -p 8080:8080 express-web-app
 ```
 
+### Create Amazon ECR repo `ecs-express-mode-sample`
+
+```bash
+./push-to-ecr.sh
+```
+
 ### Create Express Mode service
 
 With the basic GitHub Actions workflow in `.github/workflows` you can establish an automated pipeline that builds your application, packages it into a container image, and deploys it to ECS Express Mode.
