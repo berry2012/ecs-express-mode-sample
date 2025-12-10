@@ -55,7 +55,7 @@ jobs:
       with:
         # Required inputs
         service-name: ${{ env.ECS_SERVICE }}
-        image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+        image: ${{ steps.build-image.outputs.image }}
         execution-role-arn: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ecsTaskExecutionRole
         infrastructure-role-arn: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ecsInfrastructureRoleForExpressServices
         
